@@ -1,0 +1,9 @@
+date,deck,item_id,type,result,new_box,question
+2026-10-17,"Java OOP Basics",1,Concept,REMEMBERED,2,"What is Encapsulation?"
+2026-10-17,"Maths & Physics Formulas",1,Formula,REMEMBERED,2,"Area of a circle"
+2026-10-17,"Maths & Physics Formulas",2,Formula,REMEMBERED,2,"Newton's second law"
+2026-10-17,"Java OOP Basics",2,Concept,REMEMBERED,2,"What is Polymorphism?"
+2026-10-17,"Maths & Physics Formulas",3,Formula,REMEMBERED,2,"Ohm's law"
+2026-10-17,"Maths & Physics Formulas",4,Formula,REMEMBERED,2,"Quadratic formula"
+2026-10-17,"Maths & Physics Formulas",5,Formula,REMEMBERED,2,"Kinetic energy"
+2026-10-17,"Maths & Physics Formulas",6,Formula,REMEMBERED,2,"Compound interest"
