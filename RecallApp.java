@@ -88,6 +88,7 @@ public class RecallApp {
     public void selectDeck(String name) {
         for (Deck d : decks) {
             if (d.getName().equals(name)) {
+                if (currentDeck == d) return;
                 currentDeck = d;
                 fireChanged();
                 return;

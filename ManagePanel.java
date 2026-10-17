@@ -399,5 +399,8 @@ public class ManagePanel extends JPanel {
             model.addRow(new Object[]{s.getId(), s.getType(), s.getFront(), s.getTags(),
                     "Box " + s.getBoxLevel(), next, acc < 0 ? "-" : acc + "%"});
         }
+        applyFilter();
+        revalidate();
+        repaint();
     }
 }

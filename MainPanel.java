@@ -199,9 +199,24 @@ public class MainPanel extends JPanel {
         dateLabel.setText(date);
 
         updating = true;
-        deckBox.removeAllItems();
-        for (Deck d : app.getDecks()) deckBox.addItem(d.getName());
-        deckBox.setSelectedItem(deck.getName());
+        boolean itemsMatch = (deckBox.getItemCount() == app.getDecks().size());
+        if (itemsMatch) {
+            for (int i = 0; i < app.getDecks().size(); i++) {
+                if (!app.getDecks().get(i).getName().equals(deckBox.getItemAt(i))) {
+                    itemsMatch = false;
+                    break;
+                }
+            }
+        }
+        if (!itemsMatch) {
+            deckBox.removeAllItems();
+            for (Deck d : app.getDecks()) deckBox.addItem(d.getName());
+        }
+        if (deckBox.getSelectedItem() == null || !deckBox.getSelectedItem().equals(deck.getName())) {
+            deckBox.setSelectedItem(deck.getName());
+        }
         updating = false;
+        revalidate();
+        repaint();
     }
 }

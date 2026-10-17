@@ -1,11 +1,11 @@
 {
   "name": "Maths & Physics Formulas",
   "items": [
-    {"id": 1, "type": "Formula", "front": "Area of a circle", "back": "A = πr²", "extra": "the radius is known", "tags": "", "box": 3, "lastReviewed": "2026-10-19", "nextReview": "2026-10-23", "reviews": 2, "correct": 2},
-    {"id": 2, "type": "Formula", "front": "Newton's second law", "back": "F = m × a", "extra": "force, mass or acceleration is missing", "tags": "", "box": 3, "lastReviewed": "2026-10-19", "nextReview": "2026-10-23", "reviews": 2, "correct": 2},
-    {"id": 3, "type": "Formula", "front": "Ohm's law", "back": "V = I × R", "extra": "finding voltage, current or resistance in a circuit", "tags": "", "box": 2, "lastReviewed": "2026-10-17", "nextReview": "2026-10-19", "reviews": 1, "correct": 1},
-    {"id": 4, "type": "Formula", "front": "Quadratic formula", "back": "x = (−b ± √(b² − 4ac)) / 2a", "extra": "solving ax² + bx + c = 0", "tags": "", "box": 2, "lastReviewed": "2026-10-17", "nextReview": "2026-10-19", "reviews": 1, "correct": 1},
-    {"id": 5, "type": "Formula", "front": "Kinetic energy", "back": "KE = ½ m v²", "extra": "an object of mass m moves at speed v", "tags": "", "box": 2, "lastReviewed": "2026-10-17", "nextReview": "2026-10-19", "reviews": 1, "correct": 1},
-    {"id": 6, "type": "Formula", "front": "Compound interest", "back": "A = P(1 + r/n)^(nt)", "extra": "money grows with interest added n times a year", "tags": "", "box": 2, "lastReviewed": "2026-10-17", "nextReview": "2026-10-19", "reviews": 1, "correct": 1}
+    {"id": 1, "type": "Formula", "front": "Area of a circle", "back": "A = πr²", "extra": "the radius is known", "tags": "", "box": 4, "lastReviewed": "2026-10-18", "nextReview": "2026-10-26", "reviews": 3, "correct": 3},
+    {"id": 2, "type": "Formula", "front": "Newton's second law", "back": "F = m × a", "extra": "force, mass or acceleration is missing", "tags": "", "box": 4, "lastReviewed": "2026-10-18", "nextReview": "2026-10-26", "reviews": 3, "correct": 3},
+    {"id": 3, "type": "Formula", "front": "Ohm's law", "back": "V = I × R", "extra": "finding voltage, current or resistance in a circuit", "tags": "", "box": 4, "lastReviewed": "2026-10-22", "nextReview": "2026-10-30", "reviews": 3, "correct": 3},
+    {"id": 4, "type": "Formula", "front": "Quadratic formula", "back": "x = (−b ± √(b² − 4ac)) / 2a", "extra": "solving ax² + bx + c = 0", "tags": "", "box": 4, "lastReviewed": "2026-10-22", "nextReview": "2026-10-30", "reviews": 3, "correct": 3},
+    {"id": 5, "type": "Formula", "front": "Kinetic energy", "back": "KE = ½ m v²", "extra": "an object of mass m moves at speed v", "tags": "", "box": 3, "lastReviewed": "2026-10-18", "nextReview": "2026-10-22", "reviews": 2, "correct": 2},
+    {"id": 6, "type": "Formula", "front": "Compound interest", "back": "A = P(1 + r/n)^(nt)", "extra": "money grows with interest added n times a year", "tags": "", "box": 3, "lastReviewed": "2026-10-18", "nextReview": "2026-10-22", "reviews": 2, "correct": 2}
   ]
 }

@@ -128,19 +128,25 @@ public class ReviewPanel extends JPanel {
         queue = new ArrayList<>(deck.getItems());
         sessionDone = 0;
         current = null;
+        revealed = false;
         loadNextCard();
     }
 
     /** Rebuilds today's queue from the deck. Called whenever app data changes. */
     private void reload() {
-        if (cramMode) return;
         Deck deck = app.getCurrentDeck();
         LocalDate today = AppClock.today();
         String key = deck.getName() + "|" + today;
-        if (!key.equals(sessionKey)) {
+
+        boolean deckChanged = !key.equals(sessionKey);
+        if (deckChanged) {
             sessionKey = key;
             sessionDone = 0;
             current = null;
+            revealed = false;
+            cramMode = false;
+        } else if (cramMode) {
+            return;
         }
 
         try {
@@ -152,6 +158,8 @@ public class ReviewPanel extends JPanel {
             flipCard.showMessage("This deck is empty", "Open the 'Add / Manage' tab to create your first card.");
             infoLabel.setText(" ");
             buttonLayout.show(buttonHolder, "none");
+            revalidate();
+            repaint();
             return;
         }
 
@@ -168,9 +176,11 @@ public class ReviewPanel extends JPanel {
                 infoLabel.setText("Session complete: " + sessionDone + " card(s) reviewed today");
             } else {
                 flipCard.showMessage("All caught up!", "No cards currently due today. " + sub);
-                infoLabel.setText("Nothing is due today");
+                infoLabel.setText("Nothing is due today in " + deck.getName());
             }
             buttonLayout.show(buttonHolder, "done");
+            revalidate();
+            repaint();
             return;
         }
 
@@ -196,6 +206,8 @@ public class ReviewPanel extends JPanel {
                 tags);
         buttonLayout.show(buttonHolder, "show");
         updateInfo();
+        revalidate();
+        repaint();
     }
 
     private void updateInfo() {
