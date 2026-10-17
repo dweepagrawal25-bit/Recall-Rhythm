@@ -25,6 +25,12 @@ replay_pid*
 .project
 .classpath
 
+# Build and test outputs
+target/
+build/
+bin/
+test_data/
+
 # OS generated files
 .DS_Store
 Thumbs.db

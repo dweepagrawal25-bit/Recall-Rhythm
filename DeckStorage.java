@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/** Saves decks as JSON files and loads them back (file handling + validation). */
+/** Saves decks as JSON files and loads them back (file handling + validation + CSV import/export). */
 public class DeckStorage {
     private final Path dir;
 
@@ -58,6 +58,7 @@ public class DeckStorage {
                         getString(it, "front"),
                         getString(it, "back"),
                         getOptionalString(it, "extra"),
+                        getOptionalString(it, "tags"),
                         getInt(it, "box"),
                         parseDateOrNull(getOptionalString(it, "lastReviewed"), where),
                         parseDate(getString(it, "nextReview"), where),
@@ -71,6 +72,94 @@ public class DeckStorage {
             }
         }
         return deck;
+    }
+
+    /** Exports the given deck to a comma-separated values (CSV) file. */
+    public void exportToCsv(Deck deck, Path target) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("id,type,question,answer,extra,tags,box,next_review,reviews,correct\n");
+        for (StudyItem item : deck.getItems()) {
+            sb.append(item.getId()).append(',')
+              .append(csvEscape(item.getType())).append(',')
+              .append(csvEscape(item.getFront())).append(',')
+              .append(csvEscape(item.getBack())).append(',')
+              .append(csvEscape(item.getExtra())).append(',')
+              .append(csvEscape(item.getTags())).append(',')
+              .append(item.getBoxLevel()).append(',')
+              .append(item.getNextReviewDate()).append(',')
+              .append(item.getTimesReviewed()).append(',')
+              .append(item.getTimesCorrect()).append('\n');
+        }
+        if (target.getParent() != null) Files.createDirectories(target.getParent());
+        Files.write(target, sb.toString().getBytes(StandardCharsets.UTF_8));
+    }
+
+    /** Imports flashcards from a CSV file into the deck. Returns the number of successfully imported cards. */
+    public int importFromCsv(Deck deck, Path source, LocalDate today) throws IOException, InvalidCardException {
+        List<String> lines = Files.readAllLines(source, StandardCharsets.UTF_8);
+        if (lines.isEmpty()) return 0;
+        int imported = 0;
+        int startLine = 0;
+
+        // Check if first line is a header
+        String first = lines.get(0).toLowerCase();
+        if (first.contains("question") || first.contains("front") || first.contains("answer")) {
+            startLine = 1;
+        }
+
+        for (int i = startLine; i < lines.size(); i++) {
+            String line = lines.get(i).trim();
+            if (line.isEmpty()) continue;
+            List<String> cols = ReviewLog.parseCsvLine(line);
+            if (cols.size() < 2) continue;
+
+            String type = "Flashcard";
+            String front = "";
+            String back = "";
+            String extra = "";
+            String tags = "";
+
+            if (cols.size() >= 10 && tryParseInt(cols.get(0))) {
+                // Full exported format: id,type,question,answer,extra,tags...
+                type = cols.get(1).trim();
+                front = cols.get(2).trim();
+                back = cols.get(3).trim();
+                extra = cols.get(4).trim();
+                tags = cols.get(5).trim();
+            } else {
+                // Simple format: Question, Answer [, Type [, Extra [, Tags]]]
+                front = cols.get(0).trim();
+                back = cols.get(1).trim();
+                if (cols.size() > 2 && isValidType(cols.get(2).trim())) {
+                    type = cols.get(2).trim();
+                    if (cols.size() > 3) extra = cols.get(3).trim();
+                    if (cols.size() > 4) tags = cols.get(4).trim();
+                } else {
+                    if (cols.size() > 2) extra = cols.get(2).trim();
+                    if (cols.size() > 3) tags = cols.get(3).trim();
+                }
+            }
+
+            if (front.isEmpty() || back.isEmpty()) continue;
+            StudyItem item = ItemFactory.create(type, deck.nextId(), front, back, extra, tags, today);
+            deck.addItem(item);
+            imported++;
+        }
+        if (imported > 0) save(deck);
+        return imported;
+    }
+
+    private static boolean tryParseInt(String s) {
+        try { Integer.parseInt(s.trim()); return true; } catch (Exception e) { return false; }
+    }
+
+    private static boolean isValidType(String t) {
+        return "Flashcard".equalsIgnoreCase(t) || "Formula".equalsIgnoreCase(t) || "Concept".equalsIgnoreCase(t);
+    }
+
+    private static String csvEscape(String s) {
+        if (s == null) return "\"\"";
+        return "\"" + s.replace("\"", "\"\"").replace("\n", " ").replace("\r", " ") + "\"";
     }
 
     // ---------- small validation helpers ----------
@@ -105,11 +194,12 @@ public class DeckStorage {
         try {
             return LocalDate.parse(text);
         } catch (DateTimeParseException e) {
-            throw new CorruptFileException("invalid date '" + text + "' (expected yyyy-mm-dd)");
+            throw new CorruptFileException(where + " has an invalid date '" + text + "'");
         }
     }
 
     private static LocalDate parseDateOrNull(String text, String where) throws CorruptFileException {
-        return text.isEmpty() ? null : parseDate(text, where);
+        if (text == null || text.trim().isEmpty()) return null;
+        return parseDate(text, where);
     }
 }

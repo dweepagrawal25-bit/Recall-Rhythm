@@ -76,10 +76,11 @@ public class RecallApp {
     public Scheduler getScheduler() { return scheduler; }
     public ReviewLog getLog() { return log; }
     public List<String> getWarnings() { return warnings; }
+    public DeckStorage getStorage() { return storage; }
 
     public void addListener(Runnable r) { listeners.add(r); }
 
-    private void fireChanged() {
+    public void fireChanged() {
         for (Runnable r : new ArrayList<>(listeners)) r.run();
     }
 
@@ -111,10 +112,22 @@ public class RecallApp {
         fireChanged();
     }
 
+    public void addCard(String type, String front, String back, String extra, String tags)
+            throws InvalidCardException, IOException {
+        StudyItem item = ItemFactory.create(type, currentDeck.nextId(), front, back, extra, tags, AppClock.today());
+        currentDeck.addItem(item);
+        storage.save(currentDeck);
+        fireChanged();
+    }
+
     public void addCard(String type, String front, String back, String extra)
             throws InvalidCardException, IOException {
-        StudyItem item = ItemFactory.create(type, currentDeck.nextId(), front, back, extra, AppClock.today());
-        currentDeck.addItem(item);
+        addCard(type, front, back, extra, "");
+    }
+
+    public void updateCard(StudyItem item, String front, String back, String extra, String tags)
+            throws InvalidCardException, IOException {
+        ItemFactory.update(item, front, back, extra, tags);
         storage.save(currentDeck);
         fireChanged();
     }
@@ -126,12 +139,26 @@ public class RecallApp {
         }
     }
 
-    public void recordReview(StudyItem item, boolean remembered) throws IOException {
+    public void recordReview(StudyItem item, Rating rating) throws IOException {
         LocalDate today = AppClock.today();
-        item.review(remembered, today);
+        item.review(rating, today);
         storage.save(currentDeck);
-        log.log(currentDeck.getName(), item, remembered, today);
+        log.log(currentDeck.getName(), item, rating, today);
         fireChanged();
+    }
+
+    public void recordReview(StudyItem item, boolean remembered) throws IOException {
+        recordReview(item, remembered ? Rating.GOOD : Rating.AGAIN);
+    }
+
+    public void exportCurrentDeckToCsv(Path target) throws IOException {
+        storage.exportToCsv(currentDeck, target);
+    }
+
+    public int importCardsFromCsv(Path source) throws IOException, InvalidCardException {
+        int count = storage.importFromCsv(currentDeck, source, AppClock.today());
+        fireChanged();
+        return count;
     }
 
     public void skipDay() { AppClock.skipDay(); fireChanged(); }

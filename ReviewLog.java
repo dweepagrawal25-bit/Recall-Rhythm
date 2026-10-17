@@ -21,15 +21,23 @@ public class ReviewLog {
         private final LocalDate date;
         private final String deck;
         private final boolean remembered;
+        private final Rating rating;
 
         public Entry(LocalDate date, String deck, boolean remembered) {
+            this(date, deck, remembered ? Rating.GOOD : Rating.AGAIN);
+        }
+
+        public Entry(LocalDate date, String deck, Rating rating) {
             this.date = date;
             this.deck = deck;
-            this.remembered = remembered;
+            this.rating = rating;
+            this.remembered = rating.isSuccessful();
         }
+
         public LocalDate getDate() { return date; }
         public String getDeck() { return deck; }
         public boolean isRemembered() { return remembered; }
+        public Rating getRating() { return rating; }
     }
 
     private static final String HEADER = "date,deck,item_id,type,result,new_box,question";
@@ -52,11 +60,14 @@ public class ReviewLog {
                 LocalDate date = LocalDate.parse(f.get(0));
                 Integer.parseInt(f.get(2));
                 Integer.parseInt(f.get(5));
-                String result = f.get(4);
-                if (!result.equals("REMEMBERED") && !result.equals("FORGOT")) {
-                    throw new CorruptFileException("review_history.csv, line " + (i + 1) + " has an unknown result '" + result + "'");
-                }
-                loaded.add(new Entry(date, f.get(1), result.equals("REMEMBERED")));
+                String result = f.get(4).toUpperCase();
+                Rating rating;
+                if (result.equals("REMEMBERED") || result.equals("GOOD")) rating = Rating.GOOD;
+                else if (result.equals("FORGOT") || result.equals("AGAIN")) rating = Rating.AGAIN;
+                else if (result.equals("HARD")) rating = Rating.HARD;
+                else if (result.equals("EASY")) rating = Rating.EASY;
+                else throw new CorruptFileException("review_history.csv, line " + (i + 1) + " has an unknown result '" + result + "'");
+                loaded.add(new Entry(date, f.get(1), rating));
             } catch (DateTimeParseException | NumberFormatException e) {
                 throw new CorruptFileException("review_history.csv, line " + (i + 1) + " contains an invalid date or number");
             }
@@ -64,7 +75,7 @@ public class ReviewLog {
         entries.addAll(loaded);
     }
 
-    public void log(String deckName, StudyItem item, boolean remembered, LocalDate date) throws IOException {
+    public void log(String deckName, StudyItem item, Rating rating, LocalDate date) throws IOException {
         Path parent = file.toAbsolutePath().getParent();
         if (parent != null) Files.createDirectories(parent);
         boolean isNewFile = !Files.exists(file) || Files.size(file) == 0;
@@ -74,12 +85,16 @@ public class ReviewLog {
           .append(csv(deckName)).append(',')
           .append(item.getId()).append(',')
           .append(item.getType()).append(',')
-          .append(remembered ? "REMEMBERED" : "FORGOT").append(',')
+          .append(rating.name()).append(',')
           .append(item.getBoxLevel()).append(',')
           .append(csv(item.getFront())).append("\n");
         Files.write(file, sb.toString().getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        entries.add(new Entry(date, deckName, remembered));
+        entries.add(new Entry(date, deckName, rating));
+    }
+
+    public void log(String deckName, StudyItem item, boolean remembered, LocalDate date) throws IOException {
+        log(deckName, item, remembered ? Rating.GOOD : Rating.AGAIN, date);
     }
 
     public int getTotalReviews() { return entries.size(); }

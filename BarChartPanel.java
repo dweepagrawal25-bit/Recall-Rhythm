@@ -7,7 +7,7 @@ import java.awt.RenderingHints;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-/** A simple stacked bar chart drawn by hand with Java 2D (no chart library needed). */
+/** A simple stacked bar chart drawn by hand with Java 2D (no chart library needed). Supports Dark Mode. */
 public class BarChartPanel extends JPanel {
     private final String title;
     private String[] labels = new String[0];
@@ -17,8 +17,13 @@ public class BarChartPanel extends JPanel {
 
     public BarChartPanel(String title) {
         this.title = title;
-        setBackground(Color.WHITE);
+        setBackground(Theme.CARD_BG);
         setBorder(BorderFactory.createLineBorder(Theme.BORDER));
+        Theme.addListener(() -> {
+            setBackground(Theme.CARD_BG);
+            setBorder(BorderFactory.createLineBorder(Theme.BORDER));
+            repaint();
+        });
     }
 
     /** series[s][i] = value of series s for bar i. Series are stacked on top of each other. */
@@ -32,6 +37,7 @@ public class BarChartPanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+        setBackground(Theme.CARD_BG);
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

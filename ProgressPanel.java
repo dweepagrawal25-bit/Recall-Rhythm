@@ -10,13 +10,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-/** Progress screen: three charts and a summary box. */
+/** Progress screen: three charts and a summary box. Fully supports Dark Mode. */
 public class ProgressPanel extends JPanel {
     private final RecallApp app;
     private final BarChartPanel dailyChart = new BarChartPanel("Reviews - last 7 days");
     private final BarChartPanel boxChart = new BarChartPanel("Cards in each Leitner box");
     private final BarChartPanel upcomingChart = new BarChartPanel("Reviews due - next 7 days");
     private final JLabel summary = new JLabel();
+    private final JPanel summaryBox = new JPanel(new BorderLayout());
 
     public ProgressPanel(RecallApp app) {
         this.app = app;
@@ -25,8 +26,7 @@ public class ProgressPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(16, 24, 16, 24));
 
         summary.setVerticalAlignment(SwingConstants.TOP);
-        JPanel summaryBox = new JPanel(new BorderLayout());
-        summaryBox.setBackground(Color.WHITE);
+        summaryBox.setBackground(Theme.CARD_BG);
         summaryBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Theme.BORDER), BorderFactory.createEmptyBorder(14, 18, 14, 18)));
         summaryBox.add(summary, BorderLayout.CENTER);
@@ -35,7 +35,15 @@ public class ProgressPanel extends JPanel {
         add(boxChart);
         add(upcomingChart);
         add(summaryBox);
+
         app.addListener(this::refresh);
+        Theme.addListener(() -> {
+            setBackground(Theme.BG);
+            summaryBox.setBackground(Theme.CARD_BG);
+            summaryBox.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Theme.BORDER), BorderFactory.createEmptyBorder(14, 18, 14, 18)));
+            refresh();
+        });
         refresh();
     }
 
@@ -90,15 +98,19 @@ public class ProgressPanel extends JPanel {
         int acc = app.getLog().accuracyPercent();
         String weakText = (weakest == null) ? "Review some cards to find out."
                 : escape(weakest.getFront()) + " (" + weakest.getAccuracyPercent() + "% correct)";
-        summary.setText("<html><div style='font-family:sans-serif'>"
-                + "<div style='font-size:15px;font-weight:bold;color:#1F2937'>Summary: " + escape(deck.getName()) + "</div><br>"
+
+        String titleColor = Theme.isDarkMode() ? "#F8FAFC" : "#1F2937";
+        String mutedColor = Theme.isDarkMode() ? "#94A3B8" : "#6B7280";
+
+        summary.setText("<html><div style='font-family:sans-serif;color:" + titleColor + "'>"
+                + "<div style='font-size:15px;font-weight:bold;'>Summary: " + escape(deck.getName()) + "</div><br>"
                 + "Cards in deck: <b>" + deck.size() + "</b><br>"
                 + "Mastered (box 5): <b>" + deck.getMasteredCount() + "</b><br>"
                 + "Due today: <b>" + deck.getDueItems(today).size() + "</b><br>"
                 + "Total reviews logged: <b>" + app.getLog().getTotalReviews() + "</b><br>"
                 + "Overall accuracy: <b>" + (acc < 0 ? "-" : acc + "%") + "</b><br>"
                 + "Current streak: <b>" + app.getLog().getStreak(today) + " day(s)</b><br><br>"
-                + "<span style='color:#6B7280'>Needs attention:</span><br>" + weakText
+                + "<span style='color:" + mutedColor + "'>Needs attention:</span><br>" + weakText
                 + "</div></html>");
         summary.setFont(Theme.font(Font.PLAIN, 13));
     }

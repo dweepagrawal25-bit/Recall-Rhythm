@@ -4,6 +4,11 @@ import java.time.LocalDate;
 public class Formula extends StudyItem {
     private static final int[] INTERVALS = {1, 2, 4, 8, 16};
 
+    public Formula(int id, String front, String back, String extra, String tags, int box,
+                   LocalDate last, LocalDate next, int reviews, int correct) {
+        super(id, front, back, extra, tags, box, last, next, reviews, correct);
+    }
+
     public Formula(int id, String front, String back, String extra, int box,
                    LocalDate last, LocalDate next, int reviews, int correct) {
         super(id, front, back, extra, box, last, next, reviews, correct);
